@@ -47,9 +47,9 @@ func PgLoad[T any](db *gorm.DB, cond ...interface{}) (*T, *errors.Error) {
 	return md, nil
 }
 
-func PgPageFind[T any](db *gorm.DB, page *pagination.Page, query interface{}, cond ...interface{}) (*[]T, *pagination.Paging, *errors.Error) {
+func PgPageFind[T any](db *gorm.DB, page *pagination.Page, query interface{}, cond ...interface{}) (*[]*T, *pagination.Paging, *errors.Error) {
 	var md T
-	var models []T
+	var models []*T
 	var count int64
 	tx := db.Model(&md).Where(query, cond...).Count(&count)
 	if tx.Error != nil {
