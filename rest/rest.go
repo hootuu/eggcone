@@ -20,6 +20,7 @@ type Rest struct {
 
 func New(code string) *Rest {
 	ginEngine := gin.New()
+	ginEngine.Use(NewLogger(code).Handle())
 	regCode := strings.ToUpper(code)
 	cfgCode := strings.ToLower(code)
 	addr := configure.GetString(fmt.Sprintf("rest.%s.addr", cfgCode), ":8080")
