@@ -61,3 +61,12 @@ func PgPageFind[T any](db *gorm.DB, page *pagination.Page, query interface{}, co
 	}
 	return &models, pagination.PagingOfPage(page).WithCount(count), nil
 }
+
+func PgFind[T any](db *gorm.DB, query interface{}, cond ...interface{}) ([]*T, *errors.Error) {
+	var models []*T
+	tx := db.Where(query, cond...).Find(&models)
+	if tx.Error != nil {
+		return nil, errors.System("db error", tx.Error)
+	}
+	return models, nil
+}
