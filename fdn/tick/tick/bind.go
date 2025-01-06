@@ -7,18 +7,19 @@ import (
 	"github.com/hootuu/gelato/errors"
 	"github.com/hootuu/gelato/logger"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"time"
 )
 
 func BindToken(tickID ID, token token.Token) *errors.Error {
 	m := &Bind{
-		Token:      token,
-		TickID:     tickID,
-		BindTime:   time.Now(),
-		Available:  true,
-		Version:    0,
-		CreatedAt:  time.Now(),
-		ModifiedAt: time.Now(),
+		Token:     token,
+		TickID:    tickID,
+		BindTime:  time.Now(),
+		Available: true,
+		Version:   0,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 	tx := dbx.DB()
 	dbErr := tx.Create(m).Error
@@ -32,11 +33,10 @@ func BindToken(tickID ID, token token.Token) *errors.Error {
 	return nil
 }
 
-func doTxUnbindTokens(tickID ID) *errors.Error {
-	tx := dbx.DB()
+func doTxUnbindTokens(tickID ID, tx *gorm.DB) *errors.Error {
 	dbErr := tx.Model(&Bind{}).Where("tick_id", tickID).
 		Update("available", false).
-		Update("modified_at", time.Now()).
+		Update("updated_at", time.Now()).
 		Update("version", 1).Error //todo
 	if dbErr != nil {
 		return errors.System("db error", dbErr)

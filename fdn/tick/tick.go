@@ -7,6 +7,7 @@ import (
 	"github.com/hootuu/eggcone/fdn/tick/token"
 	"github.com/hootuu/gelato/errors"
 	"github.com/hootuu/gelato/logger"
+	"github.com/hootuu/gelato/sys"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 	"sync"
@@ -60,6 +61,8 @@ type Tick struct {
 	mutex sync.Mutex
 
 	crontab *cron.Cron
+
+	lstSyncSeqIdx int64
 }
 
 func newTick() (*Tick, *errors.Error) {
@@ -69,10 +72,11 @@ func newTick() (*Tick, *errors.Error) {
 	}
 
 	t := &Tick{
-		ID:           mID,
-		Tokens:       []token.Token{},
-		scheduleDict: make(map[token.Token]*Schedule),
-		crontab:      newCrontab(),
+		ID:            mID,
+		Tokens:        []token.Token{},
+		scheduleDict:  make(map[token.Token]*Schedule),
+		crontab:       newCrontab(),
+		lstSyncSeqIdx: -1,
 	}
 
 	return t, nil
@@ -111,10 +115,9 @@ func (t *Tick) heartbeat() {
 
 func (t *Tick) sync() {
 	var sArr []*schedule.Schedule
-	var lstSeqIdx int64 = -1
 	var err *errors.Error
 	for {
-		sArr, lstSeqIdx, err = schedule.LoadManyByTokens(t.Tokens, lstSeqIdx)
+		sArr, _, err = schedule.LoadManyByTokens(t.Tokens, t.lstSyncSeqIdx)
 		if err != nil {
 			logger.Logger.Error("schedule.LoadManyByTokens failed", zap.Error(err))
 			return
@@ -124,6 +127,10 @@ func (t *Tick) sync() {
 		}
 
 		for _, sM := range sArr {
+			if sM.SeqIdx > t.lstSyncSeqIdx {
+				t.lstSyncSeqIdx = sM.SeqIdx
+			}
+			sys.Info("sync schedule [", sM.Code, "]")
 			t.syncSchedule(sM)
 		}
 	}

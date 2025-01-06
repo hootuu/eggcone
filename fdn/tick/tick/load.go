@@ -4,6 +4,8 @@ import (
 	"github.com/hootuu/eggcone/database/pgx"
 	"github.com/hootuu/eggcone/fdn/tick/dbx"
 	"github.com/hootuu/gelato/errors"
+	"github.com/hootuu/gelato/logger"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -37,6 +39,7 @@ func LoadWillDied(lstSeqIdx int64) ([]*Tick, int64, error) {
 	mArr, dbErr := pgx.PgFind[Tick](dbx.DB(), "seq_idx > ? AND lst_heartbeat_time < ? AND living = ?",
 		lstSeqIdx, checkTime, true)
 	if dbErr != nil {
+		logger.Logger.Error("tick.LoadWillDied failed", zap.Int64("lstSeqIdx", lstSeqIdx), zap.Error(dbErr))
 		return nil, 0, errors.System("db error", dbErr)
 	}
 	if len(mArr) == 0 {

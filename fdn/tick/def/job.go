@@ -1,6 +1,9 @@
 package def
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	nerrors "errors"
 	"github.com/hootuu/gelato/errors"
 	"github.com/hootuu/gelato/idx"
 )
@@ -29,4 +32,22 @@ func (j *Job) Verify() *errors.Error {
 		return errors.Verify("require job.payload")
 	}
 	return nil
+}
+
+func (j *Job) Scan(value interface{}) error {
+	if value == nil {
+		j = nil
+		return nil
+	}
+
+	switch v := value.(type) {
+	case []byte:
+		return json.Unmarshal(v, j)
+	default:
+		return nerrors.New("invalid type for Dict")
+	}
+}
+
+func (j Job) Value() (driver.Value, error) {
+	return json.Marshal(j)
 }

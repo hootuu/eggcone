@@ -22,7 +22,7 @@ func newCrontab() *cron.Cron {
 
 type cronLogger struct{}
 
-var gShowCronDetails = configure.GetBool("ticktock.cron.details.show", true)
+var gShowCronDetails = configure.GetBool("tick.cron.details.show", false)
 
 func (c *cronLogger) Info(msg string, keysAndValues ...interface{}) {
 	if !gShowCronDetails {

@@ -63,10 +63,13 @@ func doRegisterSchedule(req *ScheduleIO) (schedule.ID, *errors.Error) {
 		Cron:    req.Cron,
 		Options: schedule.NewDefaultOptions(),
 		Job: &def.Job{
+			ID:      def.NewJobID(),
 			Topic:   req.Topic,
 			Payload: req.Payload,
+			Tag:     nil,
 		},
 		Signature: req.Signature,
+		Available: true,
 	}
 
 	if update {

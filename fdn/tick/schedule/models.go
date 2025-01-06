@@ -4,6 +4,8 @@ import (
 	"github.com/hootuu/eggcone/fdn/tick/def"
 	"github.com/hootuu/eggcone/fdn/tick/token"
 	"github.com/hootuu/gelato/errors"
+	"gorm.io/gorm"
+	"time"
 )
 
 type Schedule struct {
@@ -19,6 +21,11 @@ type Schedule struct {
 	Signature string      `gorm:"column:signature;not null;size:128"`
 	Version   uint64      `gorm:"column:version"`
 	SeqIdx    int64       `gorm:"column:seq_idx"`
+
+	AutoID    int64          `gorm:"column:auto_id;uniqueIndex;autoIncrement"`
+	CreatedAt time.Time      `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt time.Time      `gorm:"column:updated_at;autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index"`
 }
 
 func (m *Schedule) TableName() string {

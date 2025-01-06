@@ -11,7 +11,7 @@ func Heartbeat(id ID) *errors.Error {
 	//}, bson.M{
 	//	"$set": bson.M{
 	//		"lst_heartbeat_time": time.Now(),
-	//		"modified_at":        time.Now(),
+	//		"updated_at":        time.Now(),
 	//	},
 	//	"$inc": bson.M{
 	//		"version_id": 1,

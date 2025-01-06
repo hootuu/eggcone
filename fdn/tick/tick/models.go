@@ -3,6 +3,7 @@ package tick
 import (
 	"github.com/hootuu/eggcone/fdn/tick/schedule"
 	"github.com/hootuu/eggcone/fdn/tick/token"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -14,9 +15,11 @@ type Tick struct {
 
 	Version uint64 `gorm:"column:version"`
 
-	SeqIdx     int64     `gorm:"column:seq_idx"`
-	CreatedAt  time.Time `gorm:"column:created_at"`
-	ModifiedAt time.Time `gorm:"column:modified_at"`
+	SeqIdx    int64          `gorm:"column:seq_idx"`
+	AutoID    int64          `gorm:"column:auto_id;uniqueIndex;autoIncrement"`
+	CreatedAt time.Time      `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt time.Time      `gorm:"column:updated_at;autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index"`
 }
 
 func (m *Tick) TableName() string {
@@ -32,9 +35,11 @@ type Bind struct {
 	BindTime  time.Time   `gorm:"column:bind_time"`
 	Available bool        `gorm:"column:available"`
 
-	Version    int64     `gorm:"column:version"`
-	CreatedAt  time.Time `gorm:"column:created_at"`
-	ModifiedAt time.Time `gorm:"column:modified_at"`
+	Version   int64          `gorm:"column:version"`
+	AutoID    int64          `gorm:"column:auto_id;uniqueIndex;autoIncrement"`
+	CreatedAt time.Time      `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt time.Time      `gorm:"column:updated_at;autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index"`
 }
 
 func (m *Bind) TableName() string {
@@ -47,6 +52,11 @@ type Record struct {
 	Result     bool        `gorm:"column:result"`
 	Listener   string      `gorm:"column:listener"`
 	Ctx        any         `gorm:"column:ctx;type:json"`
+
+	AutoID    int64          `gorm:"column:auto_id;uniqueIndex;autoIncrement"`
+	CreatedAt time.Time      `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt time.Time      `gorm:"column:updated_at;autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index"`
 }
 
 func (m *Record) TableName() string { return "egg_fdn_tick_record" }

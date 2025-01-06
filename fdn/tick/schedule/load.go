@@ -6,6 +6,8 @@ import (
 	"github.com/hootuu/eggcone/fdn/tick/token"
 	"github.com/hootuu/gelato/errors"
 	"github.com/hootuu/gelato/io/pagination"
+	"github.com/hootuu/gelato/logger"
+	"go.uber.org/zap"
 )
 
 func LoadByCodeAndOutID(code string, outID string) (*Schedule, *errors.Error) {
@@ -24,6 +26,7 @@ func LoadManyByTokens(tokens []token.Token, lstSeqIdx int64) ([]*Schedule, int64
 	tx := dbx.DB()
 	mds, _, err := pgx.PgPageFind[Schedule](tx, pagination.PageALL(), "token IN ? AND seq_idx > ?", tokens, lstSeqIdx)
 	if err != nil {
+		logger.Logger.Error("loadManyByTokens Failed", zap.Any("tokens", tokens), zap.Int64("lstSeqIdx", lstSeqIdx), zap.Error(err))
 		return nil, 0, err
 	}
 	arr := *mds

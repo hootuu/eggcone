@@ -53,6 +53,23 @@ func PgPageFind[T any](db *gorm.DB, page *pagination.Page, query interface{}, co
 	var count int64
 	tx := db.Model(&md).Where(query, cond...).Count(&count)
 	if tx.Error != nil {
+		fmt.Println("PgPageFind.Count Error:", tx.Error)
+		return nil, nil, errors.System("system error", tx.Error)
+	}
+	tx = db.Where(query, cond...).Limit(int(page.Size)).Offset(int((page.Numb - 1) * page.Size)).Find(&models)
+	if tx.Error != nil {
+		fmt.Println("PgPageFind.Find Error:", tx.Error)
+		return nil, nil, errors.System("system error", tx.Error)
+	}
+	return &models, pagination.PagingOfPage(page).WithCount(count), nil
+}
+
+func PgPageOrderFind[T any](db *gorm.DB, page *pagination.Page, order interface{}, query interface{}, cond ...interface{}) (*[]*T, *pagination.Paging, *errors.Error) {
+	var md T
+	var models []*T
+	var count int64
+	tx := db.Model(&md).Order(order).Where(query, cond...).Count(&count)
+	if tx.Error != nil {
 		return nil, nil, errors.System("system error", tx.Error)
 	}
 	tx = db.Where(query, cond...).Limit(int(page.Size)).Offset(int((page.Numb - 1) * page.Size)).Find(&models)
@@ -66,6 +83,7 @@ func PgFind[T any](db *gorm.DB, query interface{}, cond ...interface{}) ([]*T, *
 	var models []*T
 	tx := db.Where(query, cond...).Find(&models)
 	if tx.Error != nil {
+		fmt.Println("db error: ", tx.Error)
 		return nil, errors.System("db error", tx.Error)
 	}
 	return models, nil

@@ -17,7 +17,7 @@ func NewTick() (ID, *errors.Error) {
 		Living:           true,
 		Version:          0,
 		CreatedAt:        time.Now(),
-		ModifiedAt:       time.Now(),
+		UpdatedAt:        time.Now(),
 	}
 	dbErr := dbx.DB().Create(m).Error
 	if dbErr != nil {
@@ -34,6 +34,7 @@ func DealRecord(scheduleID schedule.ID, result bool, ltn string, ctx any) error 
 		DealTime:   time.Now(),
 		Listener:   ltn,
 		Ctx:        ctx,
+		UpdatedAt:  time.Now(),
 	}
 
 	dbErr := dbx.DB().Create(m).Error

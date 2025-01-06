@@ -37,13 +37,14 @@ func newModel(m *Schedule) (ID, *errors.Error) {
 
 func Update(srcM *Schedule, destM *Schedule) *errors.Error {
 	up := make(map[string]interface{})
+	up["token"] = destM.Token
 	up["title"] = destM.Title
 	up["cron"] = destM.Cron
 	up["options"] = destM.Options
 	up["job"] = destM.Job
 	up["available"] = destM.Available
 	up["version"] = srcM.Version + 1
-	up["modified_at"] = time.Now()
+	up["updated_at"] = time.Now()
 
 	dbErr := dbx.DB().Model(srcM).Updates(up).Error
 	if dbErr != nil {

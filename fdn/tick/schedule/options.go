@@ -1,5 +1,11 @@
 package schedule
 
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+)
+
 type FailAct int
 
 const (
@@ -17,4 +23,22 @@ func NewDefaultOptions() *Options {
 		FailAct:   RETRY,
 		RetryTime: 3,
 	}
+}
+
+func (opt *Options) Scan(value interface{}) error {
+	if value == nil {
+		opt = nil
+		return nil
+	}
+
+	switch v := value.(type) {
+	case []byte:
+		return json.Unmarshal(v, opt)
+	default:
+		return errors.New("invalid type for Dict")
+	}
+}
+
+func (opt Options) Value() (driver.Value, error) {
+	return json.Marshal(opt)
 }
