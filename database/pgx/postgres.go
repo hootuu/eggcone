@@ -34,6 +34,9 @@ func (db *Database) DB() *gorm.DB {
 		}
 		sys.Success("# Connecting to db [", db.name, "] OK #")
 	})
+	//if sys.RunMode.IsRd() {
+	//	return db.db.Debug()
+	//}
 	return db.db
 }
 
@@ -55,7 +58,7 @@ func Register(name string, dns string, config *gorm.Config, models []interface{}
 	gPostgresDbDict[name] = postgresDB
 }
 
-func Get(name string) *Database {
+func GetDatabase(name string) *Database {
 	gPostgresDbMutex.Lock()
 	defer gPostgresDbMutex.Unlock()
 	if gPostgresDbDict == nil {
