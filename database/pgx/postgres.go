@@ -49,13 +49,25 @@ func Register(name string, dns string, config *gorm.Config, models []interface{}
 	if gPostgresDbDict == nil {
 		gPostgresDbDict = make(map[string]*Database)
 	}
+	if _, ok := gPostgresDbDict[name]; ok {
+		return
+	}
 	postgresDB := newDB(name, dns, config)
 	err := postgresDB.DB().AutoMigrate(models...)
 	if err != nil {
 		sys.Exit(errors.System("DB AutoMigrate Error: "+name, err))
 	}
-
 	gPostgresDbDict[name] = postgresDB
+}
+
+func DatabaseExist(name string) bool {
+	gPostgresDbMutex.Lock()
+	defer gPostgresDbMutex.Unlock()
+	if gPostgresDbDict == nil {
+		return false
+	}
+	_, ok := gPostgresDbDict[name]
+	return ok
 }
 
 func GetDatabase(name string) *Database {

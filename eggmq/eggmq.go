@@ -63,6 +63,9 @@ func (mq *EggMQ) Shutdown(ctx context.Context) *errors.Error {
 }
 
 func (mq *EggMQ) Send(id string, topic string, payload string) *errors.Error {
+	if sys.RunMode.IsRd() {
+		gLogger.Info("Send Message:", zap.String("topic", topic), zap.String("payload", payload))
+	}
 	msg := NewMessage(id, topic, payload)
 	err := MessageCreate(msg)
 	if err != nil {
