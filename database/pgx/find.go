@@ -23,21 +23,21 @@ func Exist[T any](db *gorm.DB, query interface{}, args ...interface{}) (bool, *e
 	return exists, nil
 }
 
-func Get[T any](db *gorm.DB, cond ...interface{}) (*T, *errors.Error) {
-	var model T
-	tx := db.First(&model, cond...)
+func Get[T any](db *gorm.DB, query string, cond ...interface{}) (*T, *errors.Error) {
+	var models []T
+	tx := db.Where(query, cond...).Limit(1).Find(&models)
 	if tx.Error != nil {
-		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
 		logger.Logger.Error("system error", zap.Any("cond", cond), zap.Error(tx.Error))
 		return nil, errors.System("db err", tx.Error)
 	}
-	return &model, nil
+	if len(models) == 0 {
+		return nil, nil
+	}
+	return &models[0], nil
 }
 
-func MustGet[T any](db *gorm.DB, cond ...interface{}) (*T, *errors.Error) {
-	model, err := Get[T](db, cond...)
+func MustGet[T any](db *gorm.DB, query string, cond ...interface{}) (*T, *errors.Error) {
+	model, err := Get[T](db, query, cond...)
 	if err != nil {
 		return nil, err
 	}

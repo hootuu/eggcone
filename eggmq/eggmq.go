@@ -75,10 +75,9 @@ func (mq *EggMQ) Send(id string, topic string, payload string) *errors.Error {
 	return nil
 }
 
-func (mq *EggMQ) RegisterListener(listener Listener) {
+func (mq *EggMQ) RegisterListener(topic string, listener Listener) {
 	mq.mu.Lock()
 	defer mq.mu.Unlock()
-	topic := listener.Topic()
 	list, ok := mq.listeners[topic]
 	if !ok {
 		list = []Listener{}
@@ -145,8 +144,8 @@ func (mq *EggMQ) doDeal(msg *Message) *errors.Error {
 
 func (mq *EggMQ) doDealMsg(msg *Message) *errors.Error {
 	listeners := mq.getListeners(msg.Topic)
-	for _, listener := range listeners {
-		err := listener.Handle(msg)
+	for _, listen := range listeners {
+		err := listen(msg)
 		if err != nil {
 			return err
 		}
