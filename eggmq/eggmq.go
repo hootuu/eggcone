@@ -2,6 +2,7 @@ package eggmq
 
 import (
 	"context"
+	"fmt"
 	"github.com/hootuu/gelato/errors"
 	"github.com/hootuu/gelato/sys"
 	"go.uber.org/zap"
@@ -143,6 +144,14 @@ func (mq *EggMQ) doDeal(msg *Message) *errors.Error {
 }
 
 func (mq *EggMQ) doDealMsg(msg *Message) *errors.Error {
+	//todo
+	fmt.Println("-------------->>>>>>>>>>>>>>>>>>")
+	fmt.Println("deal message: ", msg.Topic)
+	for k, _ := range mq.listeners {
+		fmt.Println("kkkkk: ", k)
+	}
+	fmt.Println("-------------->>>>>>>>>>>>>>>>>>")
+
 	listeners := mq.getListeners(msg.Topic)
 	for _, listen := range listeners {
 		err := listen(msg)

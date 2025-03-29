@@ -11,9 +11,12 @@ import (
 func Save[T any](
 	db *gorm.DB,
 	model *T,
-	rewriteColumns ...string,
+	clauseColumns []clause.Column,
+	rewriteColumns []string,
 ) *errors.Error {
-	clauseCond := clause.OnConflict{}
+	clauseCond := clause.OnConflict{
+		Columns: clauseColumns,
+	}
 	if len(rewriteColumns) == 0 {
 		clauseCond.UpdateAll = true
 	} else {
@@ -30,9 +33,12 @@ func Save[T any](
 func SaveMulti[T any](
 	db *gorm.DB,
 	models []*T,
-	rewriteColumns ...string,
+	clauseColumns []clause.Column,
+	rewriteColumns []string,
 ) *errors.Error {
-	clauseCond := clause.OnConflict{}
+	clauseCond := clause.OnConflict{
+		Columns: clauseColumns,
+	}
 	if len(rewriteColumns) == 0 {
 		clauseCond.UpdateAll = true
 	} else {
