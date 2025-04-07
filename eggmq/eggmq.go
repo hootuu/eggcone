@@ -2,7 +2,6 @@ package eggmq
 
 import (
 	"context"
-	"fmt"
 	"github.com/hootuu/gelato/errors"
 	"github.com/hootuu/gelato/sys"
 	"go.uber.org/zap"
@@ -20,6 +19,7 @@ type EggMQ struct {
 	wg         sync.WaitGroup
 	mu         sync.RWMutex
 	listeners  map[string][]Listener
+	stop       bool
 }
 
 func NewEggMQ(
@@ -43,6 +43,7 @@ func NewEggMQ(
 		ctx:        ctx,
 		cancel:     cancel,
 		listeners:  map[string][]Listener{},
+		stop:       false,
 	}
 }
 
@@ -57,6 +58,7 @@ func (mq *EggMQ) Startup() *errors.Error {
 }
 
 func (mq *EggMQ) Shutdown(ctx context.Context) *errors.Error {
+	mq.stop = true
 	mq.cancel()
 	mq.wg.Wait()
 	close(mq.ch)
@@ -144,13 +146,13 @@ func (mq *EggMQ) doDeal(msg *Message) *errors.Error {
 }
 
 func (mq *EggMQ) doDealMsg(msg *Message) *errors.Error {
-	//todo
-	fmt.Println("-------------->>>>>>>>>>>>>>>>>>")
-	fmt.Println("deal message: ", msg.Topic)
-	for k, _ := range mq.listeners {
-		fmt.Println("kkkkk: ", k)
-	}
-	fmt.Println("-------------->>>>>>>>>>>>>>>>>>")
+	////todo
+	//fmt.Println("-------------->>>>>>>>>>>>>>>>>>")
+	//fmt.Println("deal message: ", msg.Topic)
+	//for k, _ := range mq.listeners {
+	//	fmt.Println("kkkkk: ", k)
+	//}
+	//fmt.Println("-------------->>>>>>>>>>>>>>>>>>")
 
 	listeners := mq.getListeners(msg.Topic)
 	for _, listen := range listeners {
@@ -164,6 +166,9 @@ func (mq *EggMQ) doDealMsg(msg *Message) *errors.Error {
 
 func (mq *EggMQ) loadPendingMessages() {
 	MessageLoadPending(func(msg *Message) {
+		if mq.stop {
+			return
+		}
 		mq.ch <- msg
 	})
 	//TODO add retry for err

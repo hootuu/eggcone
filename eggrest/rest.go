@@ -1,4 +1,4 @@
-package rest
+package eggrest
 
 import (
 	"context"
@@ -16,6 +16,10 @@ type Rest struct {
 	code       string
 	httpServer *http.Server
 	ginEngine  *gin.Engine
+}
+
+func (r *Rest) Engine() *gin.Engine {
+	return r.ginEngine
 }
 
 func New(code string) *Rest {
