@@ -13,7 +13,7 @@ import (
 
 var gLogger = logger.GetLogger("eggrest")
 
-func Handle[REQ any, RESP any](ctx *gin.Context, callback func(req *rest.Request[REQ]) *rest.Response[RESP]) {
+func Handle[REQ any, RESP any](ctx *gin.Context, callback func(req *REQ) (*RESP, *errors.Error)) {
 	bodyBytes, nErr := ctx.GetRawData()
 	if nErr != nil {
 		gLogger.Error("get request body data failed", zap.Error(nErr))
@@ -55,12 +55,21 @@ func Handle[REQ any, RESP any](ctx *gin.Context, callback func(req *rest.Request
 		)
 		return
 	}
-	resp := callback(req)
+	data, err := callback(req.Data)
+	if err != nil {
+		gLogger.Error("["+ctx.Request.Method+"]",
+			zap.String("URL", ctx.Request.URL.String()),
+			zap.Any("req", req),
+			zap.Error(err))
+		ctx.JSON(http.StatusOK, rest.FailResponse[RESP](req.ID, err))
+		return
+	}
 	if gLogger.Level() <= zapcore.InfoLevel {
 		gLogger.Info("["+ctx.Request.Method+"]",
 			zap.String("URL", ctx.Request.URL.String()),
 			zap.Any("req", req),
-			zap.Any("resp", resp))
+			zap.Any("data", data),
+		)
 	}
-	ctx.JSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusOK, rest.NewResponse[RESP](req.ID, data))
 }
