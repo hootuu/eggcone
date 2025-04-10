@@ -22,7 +22,7 @@ func Save[T any](
 	} else {
 		clauseCond.DoUpdates = clause.AssignmentColumns(rewriteColumns)
 	}
-	tx := db.Clauses(clauseCond).Create(model)
+	tx := db.Clauses(clauseCond).Save(model)
 	if tx.Error != nil {
 		logger.Logger.Error("db error", zap.Any("model", model), zap.Error(tx.Error))
 		return errors.System("db err", tx.Error)
@@ -44,7 +44,7 @@ func SaveMulti[T any](
 	} else {
 		clauseCond.DoUpdates = clause.AssignmentColumns(rewriteColumns)
 	}
-	tx := db.Clauses(clauseCond).Create(&models)
+	tx := db.Clauses(clauseCond).Save(&models)
 	if tx.Error != nil {
 		logger.Logger.Error("db error", zap.Any("models", models), zap.Error(tx.Error))
 		return errors.System("db err", tx.Error)
