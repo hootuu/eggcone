@@ -26,3 +26,20 @@ func Create[T any](db *gorm.DB, model *T) *errors.Error {
 
 	return nil
 }
+
+func MultiCreate[T any](db *gorm.DB, multi []*T) *errors.Error {
+	var model T
+	_ = retry.Do(func() error {
+		tx := db.Model(&model).Create(&multi)
+		if tx.Error != nil {
+			logger.Error.Error("db multi create error", zap.Any("multi", multi), zap.Error(tx.Error))
+			return errors.System("db create error", tx.Error)
+		}
+		return nil
+	},
+		retry.Attempts(cast.ToUint(configure.GetInt("db.act.retry.attempts", 3))),
+		retry.Delay(configure.GetDuration("db.act.retry.delay", 500*time.Millisecond)),
+	)
+
+	return nil
+}
