@@ -8,6 +8,7 @@ import (
 	"github.com/hootuu/gelato/crtpto/hexx"
 	"github.com/hootuu/gelato/errors"
 	"github.com/hootuu/gelato/idx"
+	"github.com/hootuu/gelato/logger"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"time"
@@ -27,10 +28,10 @@ func (model *GuardM) TableName() string {
 	return "eggrest_guard"
 }
 
-func BuildGuard(biz string) ([]byte, *errors.Error) {
+func BuildGuard(biz string) (string, []byte, []byte, *errors.Error) {
 	pub, pri, err := ed25519x.NewRandom()
 	if err != nil {
-		return nil, err
+		return "", nil, nil, err
 	}
 	guardM := &GuardM{
 		ID:           idx.New(),
@@ -45,9 +46,18 @@ func BuildGuard(biz string) ([]byte, *errors.Error) {
 			"eggdbx.EggPgDB().Model(guardM).Create(guardM).Error",
 			zap.Error(nErr),
 		)
-		return nil, errors.System("GuardM Create Err", nErr)
+		return "", nil, nil, errors.System("GuardM Create Err", nErr)
 	}
-	return pri, nil
+	return guardM.ID, pub, pri, nil
+}
+
+func GuardExistByBiz(biz string) (bool, *errors.Error) {
+	exist, err := pgx.Exist[GuardM](eggdbx.EggPgDB(), "biz = ?", biz)
+	if err != nil {
+		logger.Error.Error("guard check biz err", zap.Error(err))
+		return false, err
+	}
+	return exist, nil
 }
 
 func Guard(id string, callback func(pubKey []byte)) *errors.Error {
