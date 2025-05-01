@@ -46,12 +46,16 @@ func EncryptWithPwd(src []byte, pwdBytes []byte) ([]byte, *errors.Error) {
 }
 
 func DecryptWithPwd(src []byte, pwdBytes []byte) ([]byte, *errors.Error) {
-	pwd := Password(pwdBytes)
-	uncoverSrc, err := pwd.Uncover(src)
+	decSrc, err := Decrypt(src)
 	if err != nil {
 		return nil, err
 	}
-	return Decrypt(uncoverSrc)
+	pwd := Password(pwdBytes)
+	uncoverSrc, err := pwd.Uncover(decSrc)
+	if err != nil {
+		return nil, err
+	}
+	return uncoverSrc, nil
 }
 
 func Encrypt(src []byte) ([]byte, *errors.Error) {
